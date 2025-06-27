@@ -55,31 +55,29 @@ jobs:
             tags: ${{ env.DOCKER_USERNAME }}/sausage-backend-report:latest
   # Упаковываем helm-чарт и пушим его в Nexus
   add_helm_chart_to_nexus:
-      name: Add Helm Chart To Nexus
-      needs: build_and_push_to_docker_hub
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
+    name: Add Helm Chart To Nexus
+    needs: build_and_push_to_docker_hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-        - name: Set up Helm
-          uses: azure/setup-helm@v3
-          with:
-            version: v3.12.0
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
 
-        - name: Package Helm chart
-          run: |
-            cd sausage-store-chart
-            helm dependency update
-            helm package .
+      - name: Package Helm chart
+        run: |
+          cd sausage-store-chart
+          helm dependency update
+          helm package .
 
-        - name: Push Helm chart to Nexus
-          run: |
-            helm plugin install https://github.com/chartmuseum/helm-push
-            helm repo add chartmuseum https://nexus.cloud-services-engineer.education-services.ru \
-              --username ${{ env.NEXUS_HELM_REPO_USER }} \
-              --password ${{ env.NEXUS_HELM_REPO_PASSWORD }}
-            cd sausage-store-chart
-            helm cm-push sausage-store-*.tgz chartmuseum --context-path="/repository/ah_vit-sausage-helm" --username="${{ env.NEXUS_HELM_REPO_USER }}" --password="${{ env.NEXUS_HELM_REPO_PASSWORD }}"
+      - name: Push Helm chart to Nexus
+        run: |
+          helm plugin install https://github.com/chartmuseum/helm-push
+          helm repo add chartmuseum ${{ secrets.NEXUS_HELM_REPO }} --username ${{ secrets.NEXUS_HELM_REPO_USER }} --password ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
+          cd sausage-store-chart
+          helm cm-push sausage-store-*.tgz "${{ env.NEXUS_HELM_REPO }}" --context-path="/repository/ah_vit-sausage-helm" --username="${{ env.NEXUS_HELM_REPO_USER }}" --password="${{ env.NEXUS_HELM_REPO_PASSWORD }}"
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:
@@ -88,34 +86,39 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v3
-  
+
         - name: Set up Helm
           uses: azure/setup-helm@v3
           with:
             version: v3.12.0
 
-        - name: Add Nexus Helm repository
+        - name: Add Nexus Helm repository # Первым шагом в пайплайне добавьте Helm-репозиторий Nexus
           run: |
-            helm repo add chartmuseum https://nexus.cloud-services-engineer.education-services.ru \
+            helm repo add chartmuseum ${{ env.NEXUS_HELM_REPO }} \
               --username ${{ env.NEXUS_HELM_REPO_USER }} \
               --password ${{ env.NEXUS_HELM_REPO_PASSWORD }}
             helm repo update
 
-        - name: Configure kubectl
+        - name: Configure kubectl # Затем добавьте в пайплайн kubeconfig, который вы получили в тренажёре. С его помощью вы выполните деплой в свой namespace.
           run: |
             echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
             export KUBECONFIG=kubeconfig.yaml
-            chmod 600 kubeconfig.yaml
 
         - name: Deploy to Kubernetes
           run: |
             echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
             export KUBECONFIG=kubeconfig.yaml
             chmod 600 kubeconfig.yaml
+            kubectl config get-contexts
             helm repo update
             echo "Listing available charts in repository..."
             helm search repo chartmuseum
             helm upgrade --install sausage-store chartmuseum/sausage-store \
               --namespace ${{ env.SAUSAGE_STORE_NAMESPACE }} \
-              --wait --timeout=10m \
-              --set global.imageRegistry=${{ env.DOCKER_USERNAME }}
+              --set frontend.fqdn=front-ah_vit.2sem.students-projects.ru \
+              --set frontend.image.repository=${{ env.DOCKER_USERNAME }}/sausage-frontend \
+              --set frontend.image.tag=latest \
+              --set backend.image.repository=${{ env.DOCKER_USERNAME }}/sausage-backend \
+              --set backend.image.tag=latest \
+              --set backend-report.image.repository=${{ env.DOCKER_USERNAME }}/sausage-backend-report \
+              --set backend-report.image.tag=latest 
