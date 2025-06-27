@@ -116,10 +116,11 @@ jobs:
             helm search repo chartmuseum
             helm upgrade --install sausage-store chartmuseum/sausage-store \
               --namespace ${{ env.SAUSAGE_STORE_NAMESPACE }} \
+              --set global.imageRegistry=${{ env.DOCKER_USERNAME }} \
               --set frontend.fqdn=front-ah_vit.2sem.students-projects.ru \
-              --set frontend.image.repository=${{ env.DOCKER_USERNAME }}/sausage-frontend \
+              --set frontend.image.repository=sausage-frontend \
               --set frontend.image.tag=latest \
-              --set backend.image.repository=${{ env.DOCKER_USERNAME }}/sausage-backend \
+              --set backend.image.repository=sausage-backend \
               --set backend.image.tag=latest \
-              --set backend-report.image.repository=${{ env.DOCKER_USERNAME }}/sausage-backend-report \
+              --set backend-report.image.repository=sausage-backend-report \
               --set backend-report.image.tag=latest 
