@@ -70,14 +70,15 @@ jobs:
           run: |
             helm package ./sausage-store-chart
             
-        - name: Add Nexus Helm Repository
+        - name: Login to Nexus Helm Registry
           run: |
-            helm repo add nexus $NEXUS_HELM_REPO --username $NEXUS_HELM_REPO_USER --password $NEXUS_HELM_REPO_PASSWORD
-            helm repo update
+            echo "${{ secrets.NEXUS_HELM_REPO_PASSWORD }}" | helm registry login ${{ env.NEXUS_HELM_REPO_HOST }} --username ${{ secrets.NEXUS_HELM_REPO_USER }} --password-stdin
+          env:
+            NEXUS_HELM_REPO_HOST: nexus.cloud-services-engineer.education-services.ru
             
         - name: Push Helm Chart to Nexus
           run: |
-            helm push sausage-store-*.tgz nexus
+            helm push sausage-store-*.tgz oci://nexus.cloud-services-engineer.education-services.ru/repository/ah_vit-sausage-helm
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:
@@ -101,14 +102,13 @@ jobs:
             echo "$KUBE_CONFIG" | base64 -d > $HOME/.kube/config
             chmod 600 $HOME/.kube/config
             
-        - name: Add Nexus Helm Repository
+        - name: Login to Nexus Helm Registry
           run: |
-            helm repo add nexus $NEXUS_HELM_REPO --username $NEXUS_HELM_REPO_USER --password $NEXUS_HELM_REPO_PASSWORD
-            helm repo update
+            echo "${{ secrets.NEXUS_HELM_REPO_PASSWORD }}" | helm registry login nexus.cloud-services-engineer.education-services.ru --username ${{ secrets.NEXUS_HELM_REPO_USER }} --password-stdin
             
         - name: Deploy to Kubernetes
           run: |
-            helm upgrade --install sausage-store nexus/sausage-store \
+            helm upgrade --install sausage-store oci://nexus.cloud-services-engineer.education-services.ru/repository/ah_vit-sausage-helm/sausage-store \
               --namespace $SAUSAGE_STORE_NAMESPACE \
               --wait --timeout=10m \
               --set global.imageRegistry=credo7
