@@ -26,25 +26,11 @@ jobs:
         - name: Set up Docker Buildx
           # Установка сборщика контейнеров Docker:
           uses: docker/setup-buildx-action@v2
-        - name: Login to Nexus Backend Registry
-          # Авторизация в Nexus Docker Registry для backend:
+        - name: Login to Nexus Docker Group Registry
+          # Авторизация в Nexus Docker Group Registry:
           uses: docker/login-action@v2
           with:
-            registry: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-backend
-            username: ${{ secrets.NEXUS_HELM_REPO_USER }}
-            password: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
-        - name: Login to Nexus Frontend Registry
-          # Авторизация в Nexus Docker Registry для frontend:
-          uses: docker/login-action@v2
-          with:
-            registry: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-frontend
-            username: ${{ secrets.NEXUS_HELM_REPO_USER }}
-            password: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
-        - name: Login to Nexus Backend-report Registry
-          # Авторизация в Nexus Docker Registry для backend-report:
-          uses: docker/login-action@v2
-          with:
-            registry: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-backend-report
+            registry: ${{ env.NEXUS_REPO }}:18080
             username: ${{ secrets.NEXUS_HELM_REPO_USER }}
             password: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
         - name: Push Backend to Nexus
@@ -53,7 +39,7 @@ jobs:
           with:
             context: ./backend/
             push: true
-            tags: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-backend/sausage-backend:latest
+            tags: ${{ env.NEXUS_REPO }}:18080/sausage-backend:latest
             build-args: |
               VERSION=${{ github.sha }}
         - name: Push Frontend to Nexus
@@ -61,13 +47,13 @@ jobs:
           with:
             context: ./frontend/
             push: true
-            tags: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-frontend/sausage-frontend:latest
+            tags: ${{ env.NEXUS_REPO }}:18080/sausage-frontend:latest
         - name: Push Backend-report to Nexus
           uses: docker/build-push-action@v4
           with:
             context: ./backend-report/
             push: true
-            tags: ${{ env.NEXUS_REPO }}/repository/ah_vit-sausage-backend-report/sausage-backend-report:latest
+            tags: ${{ env.NEXUS_REPO }}:18080/sausage-backend-report:latest
   # Упаковываем helm-чарт и пушим его в Nexus
   add_helm_chart_to_nexus:
       name: Add Helm Chart To Nexus
