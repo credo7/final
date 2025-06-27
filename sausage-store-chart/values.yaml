@@ -31,7 +31,7 @@ frontend:
       secretName: 2sem-students-projects-wildcard-secret
   containerPort: 80
   image:
-    repository: sausage-frontend
+    repository: repository/ah_vit-sausage-frontend/sausage-frontend
     tag: latest
   resources:
     requests:
@@ -64,7 +64,7 @@ backend:
       maxUnavailable: 0
       maxSurge: 1
   image:
-    repository: ah_vit-sausage-backend
+    repository: repository/ah_vit-sausage-backend/sausage-backend
     tag: latest
   imagePullPolicy: Always
   resources:
@@ -118,7 +118,7 @@ backend-report:
     port: 8080
     type: ClusterIP
   image:
-    repository: ah_vit-sausage-backend-report
+    repository: repository/ah_vit-sausage-backend-report/sausage-backend-report
     tag: latest
   imagePullPolicy: Always
   resources:
