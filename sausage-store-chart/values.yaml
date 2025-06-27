@@ -1,7 +1,7 @@
 global:
   imagePullPolicy: Always
   environment: production
-  imageRegistry: credo7
+  imageRegistry: "" # Will be set dynamically via --set in the workflow
   domain: front-2022036948.2sem.students-projects.ru
   ###vault:
   ###  host: ip
