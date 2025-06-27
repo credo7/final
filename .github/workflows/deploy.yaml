@@ -77,7 +77,7 @@ jobs:
           helm plugin install https://github.com/chartmuseum/helm-push
           helm repo add chartmuseum ${{ secrets.NEXUS_HELM_REPO }} --username ${{ secrets.NEXUS_HELM_REPO_USER }} --password ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
           cd sausage-store-chart
-          helm cm-push sausage-store-*.tgz "${{ env.NEXUS_HELM_REPO }}" --context-path="/repository/ah_vit-sausage-helm" --username="${{ env.NEXUS_HELM_REPO_USER }}" --password="${{ env.NEXUS_HELM_REPO_PASSWORD }}"
+          helm cm-push sausage-store-*.tgz "${{ secrets.NEXUS_HELM_REPO }}" --context-path="/repository/ah_vit-sausage-helm" --username="${{ env.NEXUS_HELM_REPO_USER }}" --password="${{ env.NEXUS_HELM_REPO_PASSWORD }}" --force
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:
