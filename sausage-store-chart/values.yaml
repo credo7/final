@@ -48,7 +48,7 @@ backend:
     prometheus.io/port: "8080"
     prometheus.io/scrape: "true"
   env:
-    postgresUri: jdbc:postgresql://postgresql:5432/sausage-store
+    postgresUri: jdbc:postgresql://postgresql-sausage-store:5432/sausage-store
     postgresUser: store
     postgresPassword: storepassword
     reportPath: /logs/reports
