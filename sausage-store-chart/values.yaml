@@ -1,7 +1,7 @@
 global:
   imagePullPolicy: Always
   environment: production
-  imageRegistry: credo7
+  imageRegistry: nexus.cloud-services-engineer.education-services.ru
   domain: front-2022036948.2sem.students-projects.ru
   ###vault:
   ###  host: ip
@@ -31,7 +31,7 @@ frontend:
       secretName: 2sem-students-projects-wildcard-secret
   containerPort: 80
   image:
-    repository: sausage-frontend
+    repository: ah_vit-sausage-frontend
     tag: latest
   resources:
     requests:
@@ -64,7 +64,7 @@ backend:
       maxUnavailable: 0
       maxSurge: 1
   image:
-    repository: sausage-backend
+    repository: ah_vit-sausage-backend
     tag: latest
   imagePullPolicy: Always
   resources:
@@ -118,7 +118,7 @@ backend-report:
     port: 8080
     type: ClusterIP
   image:
-    repository: sausage-backend-report
+    repository: ah_vit-sausage-backend-report
     tag: latest
   imagePullPolicy: Always
   resources:
