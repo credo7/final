@@ -1,7 +1,7 @@
 global:
   imagePullPolicy: Always
   environment: production
-  imageRegistry: nexus.cloud-services-engineer.education-services.ru:18080
+  imageRegistry: credo7
   domain: front-2022036948.2sem.students-projects.ru
   ###vault:
   ###  host: ip

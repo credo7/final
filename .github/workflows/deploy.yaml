@@ -6,18 +6,16 @@ on:
       - main
 
 env:
-  NEXUS_REPO: nexus.cloud-services-engineer.education-services.ru
   NEXUS_HELM_REPO: ${{ secrets.NEXUS_HELM_REPO }}
   NEXUS_HELM_REPO_USER: ${{ secrets.NEXUS_HELM_REPO_USER }}
   NEXUS_HELM_REPO_PASSWORD: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
   SAUSAGE_STORE_NAMESPACE: r-devops-magistracy-project-2sem-2022036948
   KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-  VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
 jobs:
-  # Сборка и пуш образов в Nexus:
-  build_and_push_to_nexus:
-      name: Push Docker images to Nexus
+  # Сборка и пуш образов в Docker Hub:
+  build_and_push_to_docker_hub:
+      name: Push Docker images to Docker Hub
       runs-on: ubuntu-latest
       steps:
         - name: Check out the repo
@@ -26,43 +24,38 @@ jobs:
         - name: Set up Docker Buildx
           # Установка сборщика контейнеров Docker:
           uses: docker/setup-buildx-action@v2
-          with:
-            config-inline: |
-              [registry."nexus.cloud-services-engineer.education-services.ru:18080"]
-                http = true
-        - name: Login to Nexus Docker Group Registry
-          # Авторизация в Nexus Docker Group Registry:
+        - name: Login to Docker Hub
+          # Авторизация в Docker Hub:
           uses: docker/login-action@v2
           with:
-            registry: ${{ env.NEXUS_REPO }}:18080
-            username: ${{ secrets.NEXUS_HELM_REPO_USER }}
-            password: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
-        - name: Push Backend to Nexus
-          # Одновременный билд и пуш образа в Nexus:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Push Backend to Docker Hub
+          # Одновременный билд и пуш образа в Docker Hub:
           uses: docker/build-push-action@v4
           with:
             context: ./backend/
             push: true
-            tags: ${{ env.NEXUS_REPO }}:18080/sausage-backend:latest
+            tags: credo7/sausage-backend:latest
             build-args: |
               VERSION=${{ github.sha }}
-        - name: Push Frontend to Nexus
+        - name: Push Frontend to Docker Hub
           uses: docker/build-push-action@v4
           with:
             context: ./frontend/
             push: true
-            tags: ${{ env.NEXUS_REPO }}:18080/sausage-frontend:latest
-        - name: Push Backend-report to Nexus
+            tags: credo7/sausage-frontend:latest
+        - name: Push Backend-report to Docker Hub
           uses: docker/build-push-action@v4
           with:
             context: ./backend-report/
             push: true
-            tags: ${{ env.NEXUS_REPO }}:18080/sausage-backend-report:latest
+            tags: credo7/sausage-backend-report:latest
   # Упаковываем helm-чарт и пушим его в Nexus
   add_helm_chart_to_nexus:
       name: Add Helm Chart To Nexus
       runs-on: ubuntu-latest
-      needs: build_and_push_to_nexus
+      needs: build_and_push_to_docker_hub
 
       steps:
         - name: Check out the repo
@@ -118,4 +111,4 @@ jobs:
             helm upgrade --install sausage-store nexus/sausage-store \
               --namespace $SAUSAGE_STORE_NAMESPACE \
               --wait --timeout=10m \
-              --set global.imageRegistry=${{ env.NEXUS_REPO }}
+              --set global.imageRegistry=credo7
