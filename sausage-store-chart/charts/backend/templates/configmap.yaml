@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sausage-backend-{{ .Release.Name }}-conf
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: sausage-backend
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: sausage-store
+    env: "{{ .Values.global.environment }}"
+data:
+  postgres_uri: {{ .Values.env.postgresUri }}
+  postgres_user: {{ .Values.env.postgresUser }}
+  postgres_password: {{ .Values.env.postgresPassword }}
+  report_path: {{ .Values.env.reportPath }}
+  log_path: {{ .Values.env.logPath }}
+  
