@@ -1,12 +1,18 @@
--- Additional indexes for reporting queries
 CREATE INDEX idx_orders_status_date ON orders(status, date_created);
-CREATE INDEX idx_order_product_composite ON order_product(product_id, order_id, quantity);
+CREATE INDEX idx_order_product_quantity ON order_product(quantity);
+CREATE INDEX idx_product_price ON product(price);
 
--- Composite index for revenue calculations
-CREATE INDEX idx_product_price_name ON product(price DESC, name);
+CREATE MATERIALIZED VIEW order_statistics AS
+SELECT 
+    p.id as product_id,
+    p.name as product_name,
+    COUNT(op.id) as total_orders,
+    SUM(op.quantity) as total_quantity,
+    AVG(op.quantity) as avg_quantity,
+    MIN(op.quantity) as min_quantity,
+    MAX(op.quantity) as max_quantity
+FROM product p
+LEFT JOIN order_product op ON p.id = op.product_id
+GROUP BY p.id, p.name;
 
--- Index for order aggregations by date ranges
-CREATE INDEX idx_orders_date_status_partial ON orders(date_created) WHERE status IN ('shipped', 'delivered');
-
--- Index for popular products analysis
-CREATE INDEX idx_order_product_quantity_product ON order_product(product_id, quantity DESC); 
+CREATE UNIQUE INDEX idx_order_statistics_product_id ON order_statistics(product_id); 

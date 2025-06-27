@@ -1,24 +1,19 @@
--- Create product table
 CREATE TABLE product (
-    id BIGINT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    picture_url VARCHAR(500),
-    price DECIMAL(19,2) NOT NULL
+    picture_url VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL
 );
 
--- Create orders table
 CREATE TABLE orders (
-    id BIGINT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     status VARCHAR(50) NOT NULL,
-    date_created DATE NOT NULL
+    date_created TIMESTAMP NOT NULL
 );
 
--- Create order_product junction table
 CREATE TABLE order_product (
-    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id SERIAL PRIMARY KEY,
     quantity INTEGER NOT NULL,
-    order_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (product_id) REFERENCES product(id)
+    order_id INTEGER REFERENCES orders(id),
+    product_id INTEGER REFERENCES product(id)
 ); 
