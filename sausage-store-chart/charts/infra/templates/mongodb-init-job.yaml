@@ -46,9 +46,10 @@ spec:
             user: "reports",
             pwd: "reportspassword", 
             roles: [
-              { role: "readWrite", db: "reports" }
+              { role: "readWrite", db: "reports" },
+              { role: "readWrite", db: "sausage-store" }
             ]
           });
-          print("Database and user created successfully");
+          print("Reports database and user created successfully");
           '
 {{- end }} 
